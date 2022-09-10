@@ -1,34 +1,41 @@
 package com.ira;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
-public class RandomTable implements Serializable {
-    private final ArrayList<ArrayList<Map<String, String>>> table = new ArrayList<>();
-
-    public RandomTable(Map<Axis, Integer> dimensions) {
-        reset(dimensions);
+public class RandomTableOperations {
+    public static void initializeRandomTable(RandomTable table, Map<Axis, Integer> dimensions) {
+        reset(table, dimensions);
     }
 
-    public String search(String keyword) {
+    public static void reset(RandomTable table, Map<Axis, Integer> dimensions) {
+        table.clear();
+        for (int rowIndex = 0; rowIndex < dimensions.get(Axis.Y); rowIndex++) {
+            table.add(new ArrayList<>());
+            for (int columnIndex = 0; columnIndex < dimensions.get(Axis.X); columnIndex++) {
+                table.get(rowIndex).add(Collections.singletonMap(randomString(), randomString()));
+            }
+        }
+    }
+
+    public static String search(RandomTable table, String keyword) {
         StringBuilder searchLines = new StringBuilder();
-        for (int row_index = 0; row_index < table.size(); row_index++) {
-            for (int column_index = 0; column_index < table.get(row_index).size(); column_index++) {
-                Map<String, String> cell = table.get(row_index).get(column_index);
+        for (int rowIndex = 0; rowIndex < table.size(); rowIndex++) {
+            for (int columnIndex = 0; columnIndex < table.get(rowIndex).size(); columnIndex++) {
+                Map<String, String> cell = table.get(rowIndex).get(columnIndex);
                 String key = cell.keySet().iterator().next();
                 String value = cell.get(key);
                 int keyFrequency = countFrequency(keyword, key);
                 int valueFrequency = countFrequency(keyword, value);
                 if (keyFrequency > 0) {
                     String format = "Found \"%s\" On (y: %d, x: %d) With %d Instance/s On Key Field\n";
-                    searchLines.append(String.format(format, keyword, row_index, column_index, keyFrequency));
+                    searchLines.append(String.format(format, keyword, rowIndex, columnIndex, keyFrequency));
                 }
                 if (valueFrequency > 0) {
                     String format = "Found \"%s\" On (y: %d, x: %d) With %d Instance/s On Value Field\n";
-                    searchLines.append(String.format(format, keyword, row_index, column_index, valueFrequency));
+                    searchLines.append(String.format(format, keyword, rowIndex, columnIndex, valueFrequency));
                 }
             }
         }
@@ -36,7 +43,7 @@ public class RandomTable implements Serializable {
         return searchLines.toString().trim();
     }
 
-    private int countFrequency(String keyword, String fullString) {
+    private static int countFrequency(String keyword, String fullString) {
         int occurrence = 0;
         int cur_index = 0;
         while ((cur_index = fullString.indexOf(keyword, cur_index)) != -1) {
@@ -46,11 +53,11 @@ public class RandomTable implements Serializable {
         return occurrence;
     }
 
-    public void edit(Map<Axis, Integer> coordinates, Map<String, String> replacement) {
+    public static void edit(RandomTable table, Map<Axis, Integer> coordinates, Map<String, String> replacement) {
         table.get(coordinates.get(Axis.Y)).set(coordinates.get(Axis.X), replacement);
     }
 
-    public String print() {
+    public static String print(RandomTable table) {
         StringBuilder tableText = new StringBuilder("\n");
         for (ArrayList<Map<String, String>> row : table) {
             StringBuilder rowText = new StringBuilder();
@@ -64,18 +71,8 @@ public class RandomTable implements Serializable {
         return tableText.toString().trim();
     }
 
-    public void reset(Map<Axis, Integer> dimensions) {
-        table.clear();
-        for (int rowIndex = 0; rowIndex < dimensions.get(Axis.Y); rowIndex++) {
-            table.add(new ArrayList<>());
-            for (int columnIndex = 0; columnIndex < dimensions.get(Axis.X); columnIndex++) {
-                table.get(rowIndex).add(Collections.singletonMap(randomString(), randomString()));
-            }
-        }
-    }
-
-    public void addColumn(int rowSpan) {
-        for (int missingRow = getRowLength(); missingRow < rowSpan; missingRow++) {
+    public static void addColumn(RandomTable table, int rowSpan) {
+        for (int missingRow = table.getRowLength(); missingRow < rowSpan; missingRow++) {
             table.add(new ArrayList<>());
         }
         for (int rowIndex = 0; rowIndex < rowSpan; rowIndex++) {
@@ -83,7 +80,7 @@ public class RandomTable implements Serializable {
         }
     }
 
-    public void addRow(int columnSpan) {
+    public static void addRow(RandomTable table, int columnSpan) {
         ArrayList<Map<String, String>> newRow = new ArrayList<>();
         for (int columnIndex = 0; columnIndex < columnSpan; columnIndex++) {
             newRow.add(Collections.singletonMap(randomString(), randomString()));
@@ -91,7 +88,7 @@ public class RandomTable implements Serializable {
         table.add(newRow);
     }
 
-    public void sortRow() {
+    public static void sortRow(RandomTable table) {
         for (ArrayList<Map<String, String>> row : table) {
             row.sort(Comparator.comparing(map -> {
                 String key = map.keySet().iterator().next();
@@ -100,7 +97,7 @@ public class RandomTable implements Serializable {
         }
     }
 
-    private String randomString() {
+    private static String randomString() {
         int minLength = 3;
         int maxLength = 7;
         int length = (int) (Math.random() * (maxLength - minLength + 1)) + minLength;
@@ -111,17 +108,5 @@ public class RandomTable implements Serializable {
         }
 
         return generatedString.toString();
-    }
-
-    public int getRowLength() {
-        return table.size();
-    }
-
-    public int[] getColumnLengths() {
-        int[] columnLengths = new int[getRowLength()];
-        for (int rowIndex = 0; rowIndex < getRowLength(); rowIndex++) {
-            columnLengths[rowIndex] = table.get(rowIndex).size();
-        }
-        return columnLengths;
     }
 }

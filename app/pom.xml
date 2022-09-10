@@ -15,6 +15,10 @@
     <dependencies>
         <dependency>
             <groupId>com.ira</groupId>
+            <artifactId>model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ira</groupId>
             <artifactId>service</artifactId>
         </dependency>
     </dependencies>
@@ -33,7 +37,7 @@
                             <outputDirectory>${project.basedir}\..</outputDirectory>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.ira.RandomTableTerminal</mainClass>
+                                    <mainClass>com.ira.TerminalApp</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

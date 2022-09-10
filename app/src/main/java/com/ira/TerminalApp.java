@@ -6,41 +6,51 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-public class RandomTableTerminal {
+public class TerminalApp {
     public static void main(String[] args) {
-        RandomTableTerminal program = new RandomTableTerminal();
-        while (program.isRunning) {
-            program.menu();
-        }
-        System.out.println("Bye");
+        TerminalApp program = new TerminalApp();
+        program.start();
+
     }
 
-    public boolean isRunning = true;
     private final Scanner scanner = new Scanner(System.in);
     private final RandomTable randomTable;
 
-    public RandomTableTerminal() {
+    public TerminalApp() {
         RandomTable loadedTable = load();
+
         if (loadedTable != null) {
             randomTable = loadedTable;
             System.out.println();
         } else {
-            Map<Axis, Integer> dimension;
+            Map<Axis, Integer> dimensions;
             while (true) {
                 try {
-                    dimension = askDimensions();
+                    dimensions = askDimensions();
                     break;
                 } catch (ActionCancelledException exception) {
                     System.out.println("\nCannot Go To Menu Yet\n");
                 }
             }
-            randomTable = new RandomTable(dimension);
+            randomTable = new RandomTable();
+            RandomTableOperations.initializeRandomTable(randomTable, dimensions);
             save();
             printDivider();
         }
     }
 
-    public void menu() {
+    public void start() {
+        while (true) {
+            try {
+                menu();
+            } catch (UserExitException exception) {
+                System.out.println("Bye");
+                return;
+            }
+        }
+    }
+
+    private void menu() throws UserExitException {
         String menuOption;
         try {
             menuOption = askMenu();
@@ -54,34 +64,35 @@ public class RandomTableTerminal {
             switch (menuOption) {
                 case "SEARCH":
                     String searchResult = askString("Enter String To Search: ");
-                    System.out.println(randomTable.print());
-                    System.out.println("\n" + randomTable.search(searchResult));
+                    System.out.println(RandomTableOperations.print(randomTable));
+                    System.out.println("\n" + RandomTableOperations.search(randomTable, searchResult));
                     break;
                 case "EDIT":
                     String replacementKey = askString("Enter Replacement Key: ");
                     String replacementValue = askString("Enter Replacement Value: ");
-                    randomTable.edit(askCoordinates(), Collections.singletonMap(replacementKey, replacementValue));
+                    RandomTableOperations.edit(
+                            randomTable,
+                            askCoordinates(),
+                            Collections.singletonMap(replacementKey, replacementValue));
                     break;
                 case "PRINT":
-                    System.out.println(randomTable.print());
+                    System.out.println(RandomTableOperations.print(randomTable));
                     break;
                 case "RESET":
-                    randomTable.reset(askDimensions());
+                    RandomTableOperations.reset(randomTable, askDimensions());
                     break;
                 case "ADD COLUMN":
-                    randomTable.addColumn(askPositiveInt("Enter Row Span: "));
+                    RandomTableOperations.addColumn(randomTable, askPositiveInt("Enter Row Span: "));
                     break;
                 case "ADD ROW":
-                    randomTable.addRow(askPositiveInt("Enter Column Span: "));
+                    RandomTableOperations.addRow(randomTable, askPositiveInt("Enter Column Span: "));
                     break;
                 case "SORT ROW":
-                    randomTable.sortRow();
-                    System.out.println(randomTable.print());
+                    RandomTableOperations.sortRow(randomTable);
+                    System.out.println(RandomTableOperations.print(randomTable));
                     break;
                 case "EXIT":
-                    isRunning = false;
-                    System.out.println("Exiting");
-                    break;
+                    throw new UserExitException();
                 default:
                     System.out.println("Wrong Menu Option");
             }
