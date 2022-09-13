@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class RandomTable extends ArrayList<ArrayList<Map<String, String>>> {
-
     public RandomTable() {
     }
 

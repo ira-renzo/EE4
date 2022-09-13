@@ -23,17 +23,19 @@ public class TerminalApp {
             randomTable = loadedTable;
             System.out.println();
         } else {
-            Map<Axis, Integer> dimensions;
+            int numberOfRows;
+            int numberOfColumns;
             while (true) {
                 try {
-                    dimensions = askDimensions();
+                    numberOfRows = askPositiveInt("Enter Number of Rows: ");
+                    numberOfColumns = askPositiveInt("Enter Number of Columns: ");
                     break;
                 } catch (ActionCancelledException exception) {
                     System.out.println("\nCannot Go To Menu Yet\n");
                 }
             }
             randomTable = new RandomTable();
-            RandomTableOperations.initializeRandomTable(randomTable, dimensions);
+            RandomTableOperations.initializeRandomTable(randomTable, numberOfRows, numberOfColumns);
             save();
             printDivider();
         }
@@ -68,18 +70,21 @@ public class TerminalApp {
                     System.out.println("\n" + RandomTableOperations.search(randomTable, searchResult));
                     break;
                 case "EDIT":
-                    String replacementKey = askString("Enter Replacement Key: ");
-                    String replacementValue = askString("Enter Replacement Value: ");
-                    RandomTableOperations.edit(
-                            randomTable,
-                            askCoordinates(),
-                            Collections.singletonMap(replacementKey, replacementValue));
+                    String newKey = askString("Enter Replacement Key: ");
+                    String newValue = askString("Enter Replacement Value: ");
+                    Map<Axis, Integer> coordinates = askCoordinates();
+                    RandomTableOperations.edit(randomTable,
+                            coordinates.get(Axis.Y),
+                            coordinates.get(Axis.X),
+                            Collections.singletonMap(newKey, newValue));
                     break;
                 case "PRINT":
                     System.out.println(RandomTableOperations.print(randomTable));
                     break;
                 case "RESET":
-                    RandomTableOperations.reset(randomTable, askDimensions());
+                    int numberOfRows = askPositiveInt("Enter Number of Rows: ");
+                    int numberOfColumns = askPositiveInt("Enter Number of Columns: ");
+                    RandomTableOperations.reset(randomTable, numberOfRows, numberOfColumns);
                     break;
                 case "ADD COLUMN":
                     RandomTableOperations.addColumn(randomTable, askPositiveInt("Enter Row Span: "));
@@ -88,7 +93,7 @@ public class TerminalApp {
                     RandomTableOperations.addRow(randomTable, askPositiveInt("Enter Column Span: "));
                     break;
                 case "SORT ROW":
-                    RandomTableOperations.sortRow(randomTable);
+                    RandomTableOperations.sortEachRow(randomTable);
                     System.out.println(RandomTableOperations.print(randomTable));
                     break;
                 case "EXIT":
@@ -115,13 +120,6 @@ public class TerminalApp {
         System.out.println("EXIT");
         System.out.println();
         return askString("Enter Choice: ").toUpperCase();
-    }
-
-    private Map<Axis, Integer> askDimensions() throws ActionCancelledException {
-        HashMap<Axis, Integer> dimensions = new HashMap<>();
-        dimensions.put(Axis.X, askPositiveInt("Enter Length of X Axis: "));
-        dimensions.put(Axis.Y, askPositiveInt("Enter Length of Y Axis: "));
-        return dimensions;
     }
 
     private Map<Axis, Integer> askCoordinates() throws ActionCancelledException {

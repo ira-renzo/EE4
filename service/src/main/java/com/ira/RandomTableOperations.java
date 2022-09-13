@@ -6,15 +6,15 @@ import java.util.Comparator;
 import java.util.Map;
 
 public class RandomTableOperations {
-    public static void initializeRandomTable(RandomTable table, Map<Axis, Integer> dimensions) {
-        reset(table, dimensions);
+    public static void initializeRandomTable(RandomTable table, int numberOfRows, int numberOfColumns) {
+        reset(table, numberOfRows, numberOfColumns);
     }
 
-    public static void reset(RandomTable table, Map<Axis, Integer> dimensions) {
+    public static void reset(RandomTable table, int numberOfRows, int numberOfColumns) {
         table.clear();
-        for (int rowIndex = 0; rowIndex < dimensions.get(Axis.Y); rowIndex++) {
+        for (int rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
             table.add(new ArrayList<>());
-            for (int columnIndex = 0; columnIndex < dimensions.get(Axis.X); columnIndex++) {
+            for (int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++) {
                 table.get(rowIndex).add(Collections.singletonMap(randomString(), randomString()));
             }
         }
@@ -53,8 +53,8 @@ public class RandomTableOperations {
         return occurrence;
     }
 
-    public static void edit(RandomTable table, Map<Axis, Integer> coordinates, Map<String, String> replacement) {
-        table.get(coordinates.get(Axis.Y)).set(coordinates.get(Axis.X), replacement);
+    public static void edit(RandomTable table, int yCoordinate, int xCoordinate, Map<String, String> replacement) {
+        table.get(yCoordinate).set(xCoordinate, replacement);
     }
 
     public static String print(RandomTable table) {
@@ -88,7 +88,7 @@ public class RandomTableOperations {
         table.add(newRow);
     }
 
-    public static void sortRow(RandomTable table) {
+    public static void sortEachRow(RandomTable table) {
         for (ArrayList<Map<String, String>> row : table) {
             row.sort(Comparator.comparing(map -> {
                 String key = map.keySet().iterator().next();
